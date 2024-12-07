@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head> <!-- Dinh dang web-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bãi đỗ xe DUT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <style>
+        /* Định dạng dòng chữ tiêu đề */
+        .title {
+            position: absolute; /* Cố định vị trí */
+            top: 10px; /* Cách mép trên 10px */
+            left: 10px; /* Cách mép trái 10px */
+            font-size: 20px; /* Kích thước chữ */
+            font-weight: bold; /* Chữ đậm */
+            color: #fff; /* Màu chữ trắng */
+            background-color: rgba(0, 0, 0, 0.5); /* Nền đen mờ */
+            padding: 5px 10px; /* Khoảng cách bên trong */
+            border-radius: 5px; /* Góc bo tròn */
+        }
+        /* Đặt container chiếm toàn bộ màn hình */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* Sắp xếp các phần tử theo cột */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            justify-content: center; /* Căn giữa theo chiều dọc */
+        }
+       
+        /* Nội dung từng phần tử */
+        .content {
+            width: 300px;
+            background-color: #f3f3f3;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px 0; /* Khoảng cách giữa các phần tử */
+            text-align: center;
+        }
+        .slot {
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .slot:hover {
+            transform: scale(1.1);
+            border: 2px solid white;
+        }
+        .parking-lot {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+         /* Phần ô đăng nhập */
+    .login-container {
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+        width: 350px;
+        color: white;
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+    }
+
+
+    .login-container:hover {
+        transform: scale(1.05);
+    }
+
+
+    .login-container input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #333;
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+
+    .login-container input:focus {
+        border-color: #00bcd4;
+        background-color: #444;
+        outline: none;
+    }
+
+
+    .login-container button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #00bcd4;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+
+    .login-container button:hover {
+        background-color: #0288d1;
+    }
+
+
+    .status {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+      }
+     
+      .status p {
+        margin: 0;
+      }
+     
+      .status.success {
+        background-color: #28a745;
+        color: white;
+      }
+     
+      .status.failure {
+        background-color: #dc3545;
+        color: white;
+      }
+     
+      .status.loading {
+        background-color: #ffc107;
+        color: black;
+      }
+     
+      .status.success:hover {
+        background-color: #218838;
+      }
+     
+      .status.failure:hover {
+        background-color: #c82333;
+      }
+     
+      .status.loading:hover {
+        background-color: #e0a800;
+      }
+     
+
+
+    </style>
+</head>
+<style>
+    body {
+        background-image: url('background.jpg'); /* Đường dẫn đến hình nền */
+        background-size: cover; /* Hình nền phủ toàn màn hình */
+        background-repeat: no-repeat; /* Không lặp lại hình nền */
+        background-attachment: fixed; /* Hình nền cố định khi cuộn trang */
+    }
+</style>
+
+
+<!-- Hieu ung tuyet roi---->
+<style>
+    /* customizable snowflake styling */
+    .snowflake {
+      color: #fff;
+      font-size: 1em;
+      font-family: Arial, sans-serif;
+      text-shadow: 0 0 5px #000;
+    }
+    .snowflake {
+        opacity: 0.8;
+        font-size: 1.5em;
+    }
+   
+     
+    .snowflake,.snowflake .inner{animation-iteration-count:infinite;animation-play-state:running}@keyframes snowflakes-fall{0%{transform:translateY(0)}100%{transform:translateY(110vh)}}@keyframes snowflakes-shake{0%,100%{transform:translateX(0)}50%{transform:translateX(80px)}}.snowflake{position:fixed;top:-10%;z-index:9999;-webkit-user-select:none;user-select:none;cursor:default;animation-name:snowflakes-shake;animation-duration:3s;animation-timing-function:ease-in-out}.snowflake .inner{animation-duration:10s;animation-name:snowflakes-fall;animation-timing-function:linear}.snowflake:nth-of-type(0){left:1%;animation-delay:0s}.snowflake:nth-of-type(0) .inner{animation-delay:0s}.snowflake:first-of-type{left:10%;animation-delay:1s}.snowflake:first-of-type .inner,.snowflake:nth-of-type(8) .inner{animation-delay:1s}.snowflake:nth-of-type(2){left:20%;animation-delay:.5s}.snowflake:nth-of-type(2) .inner,.snowflake:nth-of-type(6) .inner{animation-delay:6s}.snowflake:nth-of-type(3){left:30%;animation-delay:2s}.snowflake:nth-of-type(11) .inner,.snowflake:nth-of-type(3) .inner{animation-delay:4s}.snowflake:nth-of-type(4){left:40%;animation-delay:2s}.snowflake:nth-of-type(10) .inner,.snowflake:nth-of-type(4) .inner{animation-delay:2s}.snowflake:nth-of-type(5){left:50%;animation-delay:3s}.snowflake:nth-of-type(5) .inner{animation-delay:8s}.snowflake:nth-of-type(6){left:60%;animation-delay:2s}.snowflake:nth-of-type(7){left:70%;animation-delay:1s}.snowflake:nth-of-type(7) .inner{animation-delay:2.5s}.snowflake:nth-of-type(8){left:80%;animation-delay:0s}.snowflake:nth-of-type(9){left:90%;animation-delay:1.5s}.snowflake:nth-of-type(9) .inner{animation-delay:3s}.snowflake:nth-of-type(10){left:25%;animation-delay:0s}.snowflake:nth-of-type(11){left:65%;animation-delay:2.5s}
+    </style>
+    <div class="snowflakes" aria-hidden="true">
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+      <div class="snowflake">
+        <div class="inner">❅</div>
+      </div>
+    </div>
+<!-------------------------->
+<!---Hiệu ứng nút nhấn-->
+<style>
+    /* Phong cách chung cho các nút */
+    button {
+        background-color: #4CAF50; /* Màu nền */
+        color: white; /* Màu chữ */
+        padding: 12px 20px; /* Khoảng cách bên trong */
+        margin: 10px; /* Khoảng cách giữa các nút */
+        border: none; /* Không viền */
+        border-radius: 8px; /* Bo tròn các góc */
+        font-size: 16px; /* Kích thước chữ */
+        cursor: pointer; /* Hiển thị con trỏ chuột */
+        transition: transform 0.2s, background-color 0.2s; /* Hiệu ứng */
+
+
+   
+    }
+
+
+    /* Hiệu ứng hover */
+    button:hover {
+        background-color: #45a049; /* Thay đổi màu nền khi hover */
+        transform: scale(1.05); /* Phóng to nhẹ khi hover */
+    }
+
+
+    /* Hiệu ứng khi bấm */
+    button:active {
+        transform: scale(0.95); /* Thu nhỏ nhẹ khi bấm */
+        background-color: #3e8e41; /* Đổi màu nền khi bấm */
+    }
+
+
+    /* Căn chỉnh hai khu vực chứa nút */
+    #buttonContainer1, #buttonContainer2 {
+        text-align: center; /* Căn giữa các nút */
+        margin: 20px auto; /* Khoảng cách giữa các khu vực */
+    }
+</style>
+
+
+
+
+<body>
+    <div class="title">Bãi đỗ xe DUT</div>
+
+
+    <script> //ket noi  MQTT broker
+         
+         const client = mqtt.connect('ws://broker.emqx.io:8083/mqtt', {
+            username: 'hieutk1302',
+            password: 'hieutk1302',
+        });
+
+
+        client.on('connect', () => {
+            console.log("Connected to EMQX from web");
+
+
+     
+        });
+    </script>
+
+
+
+
+    <div id="buttonContainer1"></div> <!-- Thêm phần tử chứa nút -->
+    <div id="buttonContainer2"></div> <!-- Thêm phần tử chứa nút -->
+    <!-------------------------------------- Ô đăng nhập ------------------------------------------------->
+        <div class="login-container">
+            <h2>Đăng Nhập</h2>
+            <input type="text" id="username" placeholder="Tên đăng nhập">
+            <input type="password" id="password" placeholder="Mật khẩu">
+            <button onclick="login()">Đăng Nhập</button>
+        </div>
+        <div id="loginStatus" class="status"> </div>
+         
+    </div>
+
+
+
+
+    <script>
+        window.onload = function () {
+            client.publish("web/Logout", "True", { qos: 0, retain: false }); // Reset trạng thái trên ESP32
+            document.getElementById("loginStatus").textContent = ""; // Xóa thông báo trạng thái
+        };
+        client.subscribe("web/Login", (err) => {
+            if (err) {
+                console.error("Lỗi khi đăng ký topic web/Login", err);
+            }
+            else {console.log("Đăng ký topic web/Login thành công ! ")}
+        });
+        let isAdmin = false; // Biến xác định quyền truy cập
+
+
+       // Lắng nghe phản hồi từ ESP32
+client.on('message', (topic, message) => {
+    if (topic === "web/Login") {
+        const loginStatus = message.toString();
+
+
+        if (loginStatus === "true") {
+            isAdmin = true; // Xác nhận đăng nhập thành công
+            updateLoginStatus("success");
+            setTimeout(() => {
+                document.querySelector(".login-container").style.display = "none"; // Ẩn ô đăng nhập
+                nutdieukhien(); // Hiển thị nút điều khiển
+                nutDieuKhienMayBom();
+            }, 1000); // 1s
+        } else if (loginStatus === "false") {
+            isAdmin = false;
+            updateLoginStatus("failure"); // Đăng nhập thất bại
+        }
+    }
+});
+
+
+// Đăng nhập
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+
+    if (!username || !password) {
+        document.getElementById("loginStatus").textContent = "Vui lòng nhập tên đăng nhập và mật khẩu!";
+        return;
+    }
+
+
+    const loginPayload = `${username}|${password}`;
+    client.publish("web/Login", loginPayload, { qos: 0, retain: false }, (err) => {
+        if (err) {
+            document.getElementById("loginStatus").textContent = "Lỗi khi gửi thông tin đăng nhập!";
+        } else {
+            document.getElementById("loginStatus").textContent = "Đang xác thực...";
+        }
+    });
+}
+
+
+
+
+
+
+    </script>
+    <!--=================================================================================================-->
+   
+
+
+
+
+    <script> //Hien thi trang thai xe
+        client.subscribe("esp32/parkingStatus", (err) =>{});
+        client.on('message', (topic, message) => {
+            if (topic === 'esp32/parkingStatus') {
+                console.log('Message received:', message.toString());
+   
+                // Xử lý trạng thái cho Slot 1
+                if (message.toString().includes('Slot1:Co xe')) {
+                    document.getElementById('slot1').classList.add('occupied');
+                    document.getElementById('slot1').classList.remove('empty');
+                } else if (message.toString().includes('Slot1:Khong xe')) {
+                    document.getElementById('slot1').classList.remove('occupied');
+                    document.getElementById('slot1').classList.add('empty');
+                }
+   
+                // Xử lý trạng thái cho Slot 2
+                if (message.toString().includes('Slot2:Co xe')) {
+                    document.getElementById('slot2').classList.add('occupied');
+                    document.getElementById('slot2').classList.remove('empty');
+                } else if (message.toString().includes('Slot2:Khong xe')) {
+                    document.getElementById('slot2').classList.remove('occupied');
+                    document.getElementById('slot2').classList.add('empty');
+                }
+   
+                // Xử lý trạng thái cho Slot 3
+                if (message.toString().includes('Slot3:Co xe')) {
+                    document.getElementById('slot3').classList.add('occupied');
+                    document.getElementById('slot3').classList.remove('empty');
+                } else if (message.toString().includes('Slot3:Khong xe')) {
+                    document.getElementById('slot3').classList.remove('occupied');
+                    document.getElementById('slot3').classList.add('empty');
+                }
+            }
+        });
+
+
+
+
+    </script>
+<!-- ============================= Ô để xe ============================== -->
+    <style>
+        .parking-lot {
+            display: grid;
+            grid-template-columns: repeat(5, 100px); /* 5 ô mỗi hàng */
+            gap: 10px;
+            margin: 20px;
+        }
+       
+        .slot {
+            width: 100px; /* Chiều rộng cố định */
+            height: 150px; /* Chiều cao lớn hơn để tạo hình chữ nhật đứng */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+       
+
+
+        .empty {
+            background-image: url('empty.png'); /* Đường dẫn tới hình ảnh ô trống */
+            background-size: cover; /* Đảm bảo ảnh phủ kín ô */
+            background-position: center; /* Canh giữa hình ảnh */
+        }
+       
+        .occupied {
+            background-image: url('occupied.png'); /* Đường dẫn tới hình ảnh ô có xe */
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+<!-- ========================================================= -->
+<div class="parking-lot">
+    <!-- Tạo các ô đậu xe -->
+    <div class="slot empty" id="slot1">1</div>
+    <div class="slot empty" id="slot2">2</div>
+    <div class="slot empty" id="slot3">3</div>
+
+
+    <div class="slot occupied" id="slot4">4</div>
+    <div class="slot occupied" id="slot5">5</div>
+    <div class="slot occupied" id="slot6">6</div>
+    <div class="slot occupied" id="slot7">7</div>
+    <div class="slot occupied" id="slot8">8</div>
+    <div class="slot occupied" id="slot9">9</div>
+    <div class="slot occupied" id="slot10">10</div>
+    <!-- Thêm các ô khác nếu cần -->
+</div>
+
+
+
+
+<!--==============================================================-->
+
+
+<!-- Nut dieu khien led -->
+<script>
+    function nutdieukhien() {
+        // Đăng ký các topic
+        client.subscribe("esp32/ledState", (err) => {
+            if (err) console.error("Subscription error:", err);
+        });
+        client.subscribe("web/ledControl", (err) => {
+            if (err) console.error("Subscription error:", err);
+        });
+
+
+        let LedState = "Turn off";
+
+
+        // Xử lý tin nhắn từ ESP32
+        client.on('message', (topic, message) => {
+            if (topic === "esp32/ledState") {
+                LedState = message.toString() === "On" ? "Turn on" : "Turn off";
+                document.getElementById('btn1').innerHTML = LedState === "Turn on" ? "Đèn đang bật" : "Đèn đang tắt";
+            }
+        });
+
+
+        // Gửi lệnh điều khiển
+        function sendCommand() {
+            client.publish('web/ledControl', LedState, (err) => {
+                if (!err) console.log("Đã gửi tin nhắn: " + LedState);
+            });
+        }
+
+
+        // Tạo nút điều khiển
+        const button = document.createElement('button');
+        button.id = 'btn1';
+        button.innerHTML = 'Đèn đang tắt';
+        button.onclick = function () {
+            LedState = LedState === "Turn on" ? "Turn off" : "Turn on";
+            sendCommand();
+        };
+        document.getElementById('buttonContainer1').appendChild(button);
+    }
+</script>
+
+
+   
+<script>
+    function nutDieuKhienMayBom() {
+        // Đăng ký các topic
+        client.subscribe("esp32/motorState", (err) => {
+            if (err) console.error("Subscription error:", err);
+        });
+        client.subscribe("web/motorControl", (err) => {
+            if (err) console.error("Subscription error:", err);
+        });
+
+
+        let motorState = "Turn off";
+
+
+        // Xử lý tin nhắn từ ESP32
+        client.on('message', (topic, message) => {
+            if (topic === "esp32/motorState") {
+                motorState = message.toString() === "On" ? "Turn on" : "Turn off";
+                document.getElementById('btn2').innerHTML = motorState === "Turn on" ? "Máy bơm đang bật" : "Máy bơm đang tắt";
+            }
+        });
+
+
+        // Gửi lệnh điều khiển
+        function sendCommand() {
+            client.publish('web/motorControl', motorState, (err) => {
+                if (!err) console.log("Đã gửi tin nhắn: " + motorState);
+            });
+        }
+
+
+        // Tạo nút điều khiển
+        const button = document.createElement('button');
+        button.id = 'btn2';
+        button.innerHTML = 'Máy bơm đang tắt';
+        button.onclick = function () {
+            motorState = motorState === "Turn on" ? "Turn off" : "Turn on";
+            sendCommand();
+        };
+        document.getElementById('buttonContainer2').appendChild(button);
+    }
+</script>
+
+
+       
+    <script>
+    function updateLoginStatus(status) {
+        const loginStatus = document.getElementById("loginStatus");
+        if (status === "success") {
+            loginStatus.className = "status success";
+            loginStatus.textContent = "Đăng nhập thành công !";
+        } else if (status === "failure") {
+            loginStatus.className = "status failure";
+            loginStatus.textContent = "Sai mật khẩu hoặc tài khoản !";
+            client.publish("web/Logout", "True", { qos: 0, retain: false }); // Reset trạng thái trên ESP32
+        }
+   
+        // Sau 1 giây, ẩn thông báo
+        setTimeout(() => {
+            loginStatus.className = "status"; // Reset class
+            loginStatus.textContent = "";    // Xóa nội dung
+        }, 1000); // 1000ms = 1s
+    }
+    </script>
+
+
+</body>
+
+
+<footer>
+    <p> &copy; 2024   </p>
+</footer>
+
+
+</html>
+
