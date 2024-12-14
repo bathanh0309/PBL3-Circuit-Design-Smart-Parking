@@ -12,20 +12,26 @@
 
 ## Quick View of the Project
 
-
-**Actual interface on Altium Design software**
+**Layout on Altium Design software**
 ![image](Media/a.jpg)
 
+**2D on Altium Design software**
 ![image](Media/b.jpg)
 
+**3D on Altium Design software**
 ![image](Media/c.jpg)
 
+**Reality**
 ![image](Media/8.jpg)
 
+**Diagram**
 ![image](Media/7.jpg)
 
+**MQTTX**
 ![image](Media/9.jpg)
 
+**Login system**
 ![image](Media/10.jpg)
 
+**Web control system**
 ![image](Media/100.jpg)
