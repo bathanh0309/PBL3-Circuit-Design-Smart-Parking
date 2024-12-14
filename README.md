@@ -14,5 +14,8 @@
 
 
 **Actual interface on Altium Design software**
-![image](Media/55.jpg)
+![image](Media/a.jpg)
 
+![image](Media/b.jpg)
+
+![image](Media/c.jpg)
