@@ -5,23 +5,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 
-
-
-
-
-
-
-
 // Thông tin Wi-Fi và MQTT broker
 #define ssid "Hieu_TkZ"
 #define password "123123123"
-
-
-
-
-
-
-
 
 // Thông tin MQTT broker
 const char *mqtt_server = "broker.emqx.io";
@@ -29,22 +15,10 @@ const char *mqtt_server = "broker.emqx.io";
 #define mqtt_username "hieutk1302"
 #define mqtt_password "hieutk1302"
 
-
-
-
-
-
-
-
 WiFiClient espClient; // Sử dụng WiFiClient cho kết nối không bảo mật
 PubSubClient client(espClient);
 
-
-
 bool isLoginProcessed = false; // Biến trạng thái đã xử lý login
-
-
-
 
 // Định nghĩa kích thước màn hình OLED
 #define SCREEN_WIDTH 128
@@ -53,83 +27,34 @@ bool isLoginProcessed = false; // Biến trạng thái đã xử lý login
 // Khởi tạo đối tượng OLED
 Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
-
-
-
-
-
-
 // Định nghĩa chân
 #define DC 16        // động cơ
 #define BUTTON_DC 4  // nút động cơ
 #define AC 12        // đèn
 #define BUTTON_AC 13 // nút đèn
 
-
-
-
-
-
-
-
 // cảm biến
 #define Light 14 // cảm biến ánh sáng
 #define Flame 26 // cảm biến lửa
-
-
-
-
-
-
-
 
 // Biến lưu trạng thái cảm biến
 #define cambienxe1 32 // Chân cảm biến xe 1
 #define cambienxe2 33 // Chân cảm biến xe 2
 #define cambienxe3 25 // Chân cảm biến xe 3
 
-
-
-
-
-
-
-
 int xe1 = 0;
 int xe2 = 0;
 int xe3 = 0;
-
-
-
-
-
-
-
 
 bool ACState = false;          // Trạng thái đèn/motor
 bool lastButtonACState = HIGH; // Trạng thái nút trước đó
 bool overrideACSensor = false; // Biến để xác định có bỏ qua cảm biến hay không
 int lastLightState = HIGH;     // Lưu trạng thái cảm biến trước đó
 
-
-
-
-
-
-
-
 bool DCState = false;          // Trạng thái đèn/motor
 bool lastButtonDCState = HIGH; // Trạng thái nút trước đó
 bool overrideDCSensor = false; // Biến để xác định có bỏ qua cảm biến hay không
 int lastFlameState = HIGH;     // Lưu trạng thái cảm biến trước đó
-
-
-
-
-
-
-
 
 // Khai báo hàm
 void connectWiFi();
@@ -140,9 +65,6 @@ void parking();
 void DongcoAC();
 void DongcoDC();
 
-
-
-
 void setup()
 {
   Serial.begin(115200);
@@ -151,56 +73,21 @@ void setup()
   Serial.println("setServer completed !");
   client.setCallback(callback); // Thiết lập callback để nhận tin từ MQTT
 
-
-
-
-
-
-
-
   // Khởi tạo các chân cảm biến và động cơ
   pinMode(cambienxe1, INPUT);
   pinMode(cambienxe2, INPUT);
   pinMode(cambienxe3, INPUT);
 
-
-
-
-
-
-
-
   pinMode(DC, OUTPUT);
   pinMode(BUTTON_DC, INPUT_PULLUP);
   digitalWrite(DC, digitalRead(Flame)); // motor bật hay tắt lúc đầu là do cảm biến
-
-
-
-
-
-
-
 
   pinMode(AC, OUTPUT);
   pinMode(BUTTON_AC, INPUT_PULLUP);
   digitalWrite(AC, digitalRead(Light)); // đèn bật hay tắt lúc đầu là do cảm biến
 
-
-
-
-
-
-
-
   pinMode(Flame, INPUT_PULLUP);
   pinMode(Light, INPUT_PULLUP);
-
-
-
-
-
-
-
 
   // Khởi động màn hình OLED
   Wire.begin(21, 22);
@@ -208,13 +95,6 @@ void setup()
   display.clearDisplay();             // Xóa bộ đệm hiển thị
   display.setTextSize(0.7);           // Đặt kích thước chữ
   display.setTextColor(SH110X_WHITE); // Đặt màu chữ
-
-
-
-
-
-
-
 
   // Hiển thị thông điệp chào mừng trên OLED
   display.setCursor(0, 0);
@@ -224,11 +104,6 @@ void setup()
   display.display(); // Cập nhật hiển thị
   delay(2000);       // Đợi 2 giây trước khi tiếp tục
 }
-
-
-
-
-
 
 void loop() {
   if (!client.connected()) {
@@ -313,14 +188,6 @@ void callback(char *topic, byte *payload, unsigned int length) {
     } 
 }
 
-
-
-
-
-
-
-
-
 // Hàm kết nối với mqtt broker
 void reconnect()
 {
@@ -329,13 +196,6 @@ void reconnect()
     Serial.print("Attempting MQTT connection...");
     String clientID = "ESPClient-";
     clientID += String(random(0xffff), HEX);
-
-
-
-
-
-
-
 
     // Kết nối với broker MQTT với username và password
     if (client.connect(clientID.c_str(), mqtt_username, mqtt_password))
@@ -370,13 +230,6 @@ void reconnect()
   }
 }
 
-
-
-
-
-
-
-
 // Hàm kết nối Wi-Fi
 void connectWiFi()
 {
@@ -396,36 +249,15 @@ xe1 = digitalRead(cambienxe1);
 xe2 = digitalRead(cambienxe2);
 xe3 = digitalRead(cambienxe3);
 
-
-
-
-
-
-
-
 // Hiển thị thông điệp chào mừng
 display.clearDisplay();
 display.setCursor(30, 0);
 display.println("Welcome to DUT");
 
-
-
-
-
-
-
-
 // Mảng chứa trạng thái và vị trí
 int xe[] = {xe1, xe2, xe3};
 const char* slots[] = {"Slot1", "Slot2", "Slot3"};
 const char* statuses[] = {"Co xe", "Khong xe"};
-
-
-
-
-
-
-
 
 for (int i = 0; i < 3; i++) {
     display.setCursor(30, 10 + (i * 10));
@@ -433,13 +265,6 @@ for (int i = 0; i < 3; i++) {
     display.print(": ");
     display.println(statuses[xe[i]]);
 }
-
-
-
-
-
-
-
 
 // Kiểm tra nếu tất cả vị trí đều có xe
 if (xe1 == LOW && xe2 == LOW && xe3 == LOW) {
@@ -450,41 +275,21 @@ if (xe1 == LOW && xe2 == LOW && xe3 == LOW) {
     display.println("See you again");
 }
 
-
-
-
-
-
-
-
 // Cập nhật màn hình OLED
 display.display();
 // Thêm một khoảng thời gian để giảm tần suất đọc
 delay(100);
 }
 
-
-
-
 void parking() {
   int giaTri1 = digitalRead(cambienxe1);
   int giaTri2 = digitalRead(cambienxe2);
   int giaTri3 = digitalRead(cambienxe3);
 
-
-
-
     client.publish("esp32/parkingStatus", giaTri1 == HIGH ? "Slot1:Khong xe" : "Slot1:Co xe");
     client.publish("esp32/parkingStatus", giaTri2 == HIGH ? "Slot2:Khong xe" : "Slot2:Co xe");
     client.publish("esp32/parkingStatus", giaTri3 == HIGH ? "Slot3:Khong xe" : "Slot3:Co xe");
 }
-
-
-
-
-
-
-
 
 void DongcoAC()
 {
@@ -492,9 +297,6 @@ void DongcoAC()
   bool currentButtonACState = digitalRead(BUTTON_AC);
   // Đọc trạng thái cảm biến ánh sáng
   int currentLightState = digitalRead(Light);
-
-
-
 
   // Khi nút nhấn được nhấn (nhấn vào = LOW)
   if (lastButtonACState == HIGH && currentButtonACState == LOW)
@@ -504,9 +306,6 @@ void DongcoAC()
     digitalWrite(AC, ACState ? LOW : HIGH);
   }
   lastButtonACState = currentButtonACState;
-
-
-
 
   // Kiểm tra nếu cảm biến thay đổi trạng thái
   if (currentLightState != lastLightState)
@@ -531,28 +330,12 @@ void DongcoAC()
   }
 }
 
-
-
-
-
-
-
-
-
-
 void DongcoDC()
 {
   // Đọc trạng thái nút nhấn
   bool currentButtonDCState = digitalRead(BUTTON_DC);
   // Đọc trạng thái cảm biến Flame
   int currentFlameState = digitalRead(Flame);
-
-
-
-
-
-
-
 
   // Khi nút nhấn được nhấn (nhấn vào = LOW)
   if (lastButtonDCState == HIGH && currentButtonDCState == LOW)
@@ -563,26 +346,12 @@ void DongcoDC()
   }
   lastButtonDCState = currentButtonDCState;
 
-
-
-
-
-
-
-
   // Kiểm tra nếu cảm biến thay đổi trạng thái
   if (currentFlameState != lastFlameState)
   {
     overrideDCSensor = false;           // Khôi phục quyền điều khiển của cảm biến
     lastFlameState = currentFlameState; // Cập nhật trạng thái cảm biến
   }
-
-
-
-
-
-
-
 
   // Nếu không bị nút nhấn ưu tiên, dùng tín hiệu từ cảm biến
   if (!overrideDCSensor)
@@ -600,66 +369,4 @@ void DongcoDC()
     delay(10);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
